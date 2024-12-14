@@ -1,13 +1,10 @@
 package v1
 
 import (
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
-	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/pkg/logger"
+	"github.com/dariuszdroba/go-from-template/internal/entity"
+	"github.com/dariuszdroba/go-from-template/pkg/logger"
 )
 
 func newProductRoutes(handler *gin.RouterGroup, l logger.Interface) {
@@ -15,7 +12,6 @@ func newProductRoutes(handler *gin.RouterGroup, l logger.Interface) {
 	h := handler.Group("/products")
 	{
 		h.GET("/history")
-		h.POST("/do-translate", r.doTranslate)
 	}
 }
 
@@ -32,17 +28,6 @@ type historyResponse struct {
 // @Success     200 {object} historyResponse
 // @Failure     500 {object} response
 // @Router      /translation/history [get]
-func (r *translationRoutes) history(c *gin.Context) {
-	translations, err := r.t.History(c.Request.Context())
-	if err != nil {
-		r.l.Error(err, "http - v1 - history")
-		errorResponse(c, http.StatusInternalServerError, "database problems")
-
-		return
-	}
-
-	c.JSON(http.StatusOK, historyResponse{translations})
-}
 
 type doTranslateRequest struct {
 	Source      string `json:"source"       binding:"required"  example:"auto"`
@@ -61,29 +46,3 @@ type doTranslateRequest struct {
 // @Failure     400 {object} response
 // @Failure     500 {object} response
 // @Router      /translation/do-translate [post]
-func (r *translationRoutes) doTranslate(c *gin.Context) {
-	var request doTranslateRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		r.l.Error(err, "http - v1 - doTranslate")
-		errorResponse(c, http.StatusBadRequest, "invalid request body")
-
-		return
-	}
-
-	translation, err := r.t.Translate(
-		c.Request.Context(),
-		entity.Translation{
-			Source:      request.Source,
-			Destination: request.Destination,
-			Original:    request.Original,
-		},
-	)
-	if err != nil {
-		r.l.Error(err, "http - v1 - doTranslate")
-		errorResponse(c, http.StatusInternalServerError, "translation service problems")
-
-		return
-	}
-
-	c.JSON(http.StatusOK, translation)
-}

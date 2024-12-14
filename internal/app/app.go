@@ -9,16 +9,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/evrone/go-clean-template/config"
-	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repo"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
-	"github.com/evrone/go-clean-template/pkg/httpserver"
-	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/evrone/go-clean-template/pkg/postgres"
-	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/dariuszdroba/go-from-template/config"
+	amqprpc "github.com/dariuszdroba/go-from-template/internal/controller/amqp_rpc"
+	v1 "github.com/dariuszdroba/go-from-template/internal/controller/http/v1"
+	"github.com/dariuszdroba/go-from-template/internal/usecase"
+	"github.com/dariuszdroba/go-from-template/internal/usecase/repo"
+	"github.com/dariuszdroba/go-from-template/internal/usecase/webapi"
+	"github.com/dariuszdroba/go-from-template/pkg/httpserver"
+	"github.com/dariuszdroba/go-from-template/pkg/logger"
+	"github.com/dariuszdroba/go-from-template/pkg/postgres"
+	"github.com/dariuszdroba/go-from-template/pkg/rabbitmq/rmq_rpc/server"
 )
 
 // Run creates objects via constructors.
