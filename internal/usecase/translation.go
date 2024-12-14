@@ -25,7 +25,7 @@ func New(r TranslationRepo, w TranslationWebAPI) *TranslationUseCase {
 func (uc *TranslationUseCase) History(ctx context.Context) ([]entity.Translation, error) {
 	translations, err := uc.repo.GetHistory(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("TranslationUseCase - History - s.repo.GetHistory: %w", err)
+		return nil, fmt.Errorf("TranslationUseCase - History - s.repository.GetHistory: %w", err)
 	}
 
 	return translations, nil
@@ -40,7 +40,7 @@ func (uc *TranslationUseCase) Translate(ctx context.Context, t entity.Translatio
 
 	err = uc.repo.Store(context.Background(), translation)
 	if err != nil {
-		return entity.Translation{}, fmt.Errorf("TranslationUseCase - Translate - s.repo.Store: %w", err)
+		return entity.Translation{}, fmt.Errorf("TranslationUseCase - Translate - s.repository.Store: %w", err)
 	}
 
 	return translation, nil

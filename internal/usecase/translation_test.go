@@ -99,7 +99,7 @@ func TestTranslate(t *testing.T) {
 			err: errInternalServErr,
 		},
 		{
-			name: "repo error",
+			name: "repository error",
 			mock: func() {
 				webAPI.EXPECT().Translate(entity.Translation{}).Return(entity.Translation{}, nil)
 				repo.EXPECT().Store(context.Background(), entity.Translation{}).Return(errInternalServErr)

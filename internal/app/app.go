@@ -13,7 +13,7 @@ import (
 	amqprpc "github.com/dariuszdroba/go-from-template/internal/controller/amqp_rpc"
 	v1 "github.com/dariuszdroba/go-from-template/internal/controller/http/v1"
 	"github.com/dariuszdroba/go-from-template/internal/usecase"
-	"github.com/dariuszdroba/go-from-template/internal/usecase/repo"
+	"github.com/dariuszdroba/go-from-template/internal/usecase/repository"
 	"github.com/dariuszdroba/go-from-template/internal/usecase/webapi"
 	"github.com/dariuszdroba/go-from-template/pkg/httpserver"
 	"github.com/dariuszdroba/go-from-template/pkg/logger"
@@ -34,7 +34,7 @@ func Run(cfg *config.Config) {
 
 	// Use case
 	translationUseCase := usecase.New(
-		repo.New(pg),
+		repository.New(pg),
 		webapi.New(),
 	)
 

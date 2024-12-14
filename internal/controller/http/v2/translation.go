@@ -1,48 +1,108 @@
-package v1
+package v2
 
 import (
-	"github.com/gin-gonic/gin"
-
+	"context"
 	"github.com/dariuszdroba/go-from-template/internal/entity"
-	"github.com/dariuszdroba/go-from-template/pkg/logger"
+	"github.com/dariuszdroba/go-from-template/internal/usecase"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
 )
 
-func newProductRoutes(handler *gin.RouterGroup, l logger.Interface) {
+type ProductHandler struct {
+	uc usecase.ProductUseCase
+}
 
-	h := handler.Group("/products")
+func NewProductHandler(uc usecase.ProductUseCase) *ProductHandler {
+	return &ProductHandler{uc: uc}
+}
+
+func (h *ProductHandler) RegisterRoutes(r gin.IRouter) {
+	products := r.Group("/products")
 	{
-		h.GET("/history")
+		products.GET("/", h.ListProducts)
+		products.POST("/", h.CreateProduct)
+		products.GET("/:id", h.GetProduct)
+		products.PUT("/:id", h.UpdateProduct)
+		products.DELETE("/:id", h.DeleteProduct)
 	}
 }
 
-type historyResponse struct {
-	History []entity.Translation `json:"history"`
+func (h *ProductHandler) CreateProduct(c *gin.Context) {
+	var p entity.Product
+	if err := c.ShouldBind(&p); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx := context.Background()
+	id, err := h.uc.Create(ctx, &p)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	p.ID = strconv.FormatUint(id, 10)
+	c.JSON(http.StatusCreated, p)
 }
 
-// @Summary     Show history
-// @Description Show all translation history
-// @ID          history
-// @Tags  	    translation
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} historyResponse
-// @Failure     500 {object} response
-// @Router      /translation/history [get]
-
-type doTranslateRequest struct {
-	Source      string `json:"source"       binding:"required"  example:"auto"`
-	Destination string `json:"destination"  binding:"required"  example:"en"`
-	Original    string `json:"original"     binding:"required"  example:"текст для перевода"`
+func (h *ProductHandler) GetProduct(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	ctx := context.Background()
+	product, err := h.uc.GetByID(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if product == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
+		return
+	}
+	c.JSON(http.StatusOK, product)
 }
-
-// @Summary     Translate
-// @Description Translate a text
-// @ID          do-translate
-// @Tags  	    translation
-// @Accept      json
-// @Produce     json
-// @Param       request body doTranslateRequest true "Set up translation"
-// @Success     200 {object} entity.Translation
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /translation/do-translate [post]
+func (h *ProductHandler) UpdateProduct(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	var p entity.Product
+	if err := c.ShouldBind(&p); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	p.ID = strconv.FormatUint(id, 10)
+	ctx := context.Background()
+	if err := h.uc.Update(ctx, &p); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
+}
+func (h *ProductHandler) DeleteProduct(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+	}
+	ctx := context.Background()
+	if err := h.uc.Delete(ctx, id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
+}
+func (h *ProductHandler) ListProducts(c *gin.Context) {
+	ctx := context.Background()
+	products, err := h.uc.List(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, products)
+}
