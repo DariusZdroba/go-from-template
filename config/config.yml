@@ -1,6 +1,7 @@
 app:
   name: 'go-clean-template'
   version: '1.0.0'
+  url: 'localhost'
 
 http:
   port: '8080'
