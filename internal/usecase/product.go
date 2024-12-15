@@ -12,6 +12,7 @@ type ProductUseCase interface {
 	Update(ctx context.Context, p *entity.Product) error
 	Delete(ctx context.Context, id uint64) error
 	List(ctx context.Context) ([]*entity.Product, error)
+	GetProductHistory(ctx context.Context, id uint64) (*entity.Product, []*entity.ProductHistory, error)
 }
 
 type productUseCase struct {
@@ -37,4 +38,7 @@ func (uc *productUseCase) Delete(ctx context.Context, id uint64) error {
 }
 func (uc *productUseCase) List(ctx context.Context) ([]*entity.Product, error) {
 	return uc.repo.List(ctx)
+}
+func (uc *productUseCase) GetProductHistory(ctx context.Context, id uint64) (*entity.Product, []*entity.ProductHistory, error) {
+	return uc.repo.GetProductHistory(ctx, id)
 }

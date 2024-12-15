@@ -17,3 +17,14 @@ type Product struct {
 	CreatedAt   string `json:"created_at" example:"2020-01-01"`
 	UpdatedAt   string `json:"updated_at" example:"2020-01-01"`
 }
+
+type ProductHistory struct {
+	ID          int    `json:"id" example:"1"`
+	ProductID   int    `json:"product_id" example:"1"`
+	Name        string `json:"name" example:"Darius"`
+	Description string `json:"description" example:"A great product"`
+	Price       int    `json:"price" example:"100"`
+	ValidFrom   string `json:"valid_from" example:"2020-01-01"`
+	ValidTo     string `json:"valid_to" example:"2020-01-01"`
+	CreatedAt   string `json:"created_at" example:"2020-01-01"`
+}
