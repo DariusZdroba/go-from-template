@@ -6,11 +6,12 @@ import (
 	"github.com/dariuszdroba/go-from-template/internal/usecase"
 	"github.com/dariuszdroba/go-from-template/internal/usecase/repository"
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/test")
+	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/test")
 	if err != nil {
 		log.Fatal(err)
 	}
