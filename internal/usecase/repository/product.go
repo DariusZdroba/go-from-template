@@ -103,7 +103,7 @@ func (r *productRepo) GetProductHistory(ctx context.Context, id uint64) (*entity
 	historyQuery := `SELECT name, description, price, valid_from, valid_to FROM product_history WHERE product_id = ?`
 
 	p := &entity.Product{}
-	err := r.db.QueryRowContext(ctx, productQuery, id).Scan(&p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.UpdatedAt)
+	err := r.db.QueryRowContext(ctx, productQuery, id).Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return nil, nil, err
 	}
