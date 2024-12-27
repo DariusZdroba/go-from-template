@@ -13,6 +13,9 @@ type ProductRepository interface {
 	Delete(ctx context.Context, id uint64) error
 	List(ctx context.Context) ([]*entity.Product, error)
 	GetProductHistory(ctx context.Context, id uint64) (*entity.Product, []*entity.ProductHistory, error)
+	GetHighestPrice(ctx context.Context, id uint64) (*entity.ProductMaxValue, error)
+	GetTimeDiff(ctx context.Context, id uint64) ([]*entity.TimeDiff, error)
+	GetByDate(ctx context.Context, id uint64, rd *entity.ReferenceDate) (*entity.ProductHistory, error)
 }
 
 type productRepo struct {
@@ -59,7 +62,7 @@ func (r *productRepo) Update(ctx context.Context, p *entity.Product) error {
 		}
 	}()
 	// Initial Product state to history
-	queryHistoryInsert := `INSERT into product_history (product_id, name, description, price, valid_from, valid_to, created_at) SELECT id, name, description, price, created_at, NOW(), NOW() + INTERVAL 7 DAY FROM products WHERE id = ?`
+	queryHistoryInsert := `INSERT into product_history (product_id, name, description, price, created_at, valid_from, valid_to) SELECT id, name, description, price, created_at, NOW(), NOW() + INTERVAL 7 DAY FROM products WHERE id = ?`
 
 	_, err = tx.ExecContext(ctx, queryHistoryInsert, p.ID)
 	if err != nil {
@@ -124,4 +127,41 @@ func (r *productRepo) GetProductHistory(ctx context.Context, id uint64) (*entity
 		history = append(history, h)
 	}
 	return p, history, nil
+}
+
+func (r *productRepo) GetHighestPrice(ctx context.Context, id uint64) (*entity.ProductMaxValue, error) {
+	maxPriceQuery := `SELECT price, TIMEDIFF(valid_to, valid_from) AS duration FROM test.product_history WHERE product_id = ? ORDER BY duration DESC, price DESC LIMIT 1; `
+	pMax := &entity.ProductMaxValue{}
+	err := r.db.QueryRowContext(ctx, maxPriceQuery, id).Scan(&pMax.Price, &pMax.Duration)
+	if err != nil {
+		return nil, err
+	}
+	return pMax, nil
+}
+func (r *productRepo) GetTimeDiff(ctx context.Context, id uint64) ([]*entity.TimeDiff, error) {
+	timeDiffQuery := `SELECT valid_from, valid_to, price FROM test.product_history WHERE product_id = ? ORDER BY valid_from, valid_to;`
+	var tDiffs []*entity.TimeDiff
+	rows, err := r.db.QueryContext(ctx, timeDiffQuery, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		t := &entity.TimeDiff{}
+		err := rows.Scan(&t.ValidFrom, &t.ValidTo, &t.Price)
+		if err != nil {
+			return nil, err
+		}
+		tDiffs = append(tDiffs, t)
+	}
+	return tDiffs, nil
+}
+func (r *productRepo) GetByDate(ctx context.Context, id uint64, rd *entity.ReferenceDate) (*entity.ProductHistory, error) {
+	byDateQuery := `SELECT * FROM test.product_history WHERE product_id = ? AND ? BETWEEN valid_from AND valid_to ORDER BY valid_from DESC LIMIT 1`
+	ph := &entity.ProductHistory{}
+	err := r.db.QueryRowContext(ctx, byDateQuery, id, rd.DateTime).Scan(&ph.ID, &ph.ProductID, &ph.Name, &ph.Description, &ph.Price, &ph.ValidFrom, &ph.ValidFrom, &ph.ValidTo)
+	if err != nil {
+		return nil, err
+	}
+	return ph, nil
 }

@@ -28,3 +28,18 @@ type ProductHistory struct {
 	ValidTo     string `json:"valid_to" example:"2020-01-01"`
 	CreatedAt   string `json:"created_at" example:"2020-01-01"`
 }
+
+type ProductMaxValue struct {
+	Price    int    `json:"price"`
+	Duration string `json:"duration" example:"10"`
+}
+
+type TimeDiff struct {
+	ValidFrom string `json:"valid_from"`
+	ValidTo   string `json:"valid_to"`
+	Price     int    `json:"price"`
+}
+
+type ReferenceDate struct {
+	DateTime string `json:"date_time" example:"2020-01-01"`
+}

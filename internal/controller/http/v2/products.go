@@ -26,6 +26,9 @@ func (h *ProductHandler) RegisterRoutes(r gin.IRouter) {
 		products.GET("/history/:id", h.GetProductHistory)
 		products.PUT("/:id", h.UpdateProduct)
 		products.DELETE("/:id", h.DeleteProduct)
+		products.GET("/maxPrice/:id", h.GetHighestPrice)
+		products.GET("/timeDiff/:id", h.GetTimeDiff)
+		products.POST("/referenceDate/:id", h.GetByDate)
 	}
 }
 
@@ -125,4 +128,51 @@ func (h *ProductHandler) ListProducts(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, products)
+}
+
+func (h *ProductHandler) GetHighestPrice(c *gin.Context) {
+	ctx := context.Background()
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+	}
+	pMax, err := h.uc.GetHighestPrice(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, pMax)
+}
+
+func (h *ProductHandler) GetTimeDiff(c *gin.Context) {
+	ctx := context.Background()
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+	}
+	tDiffs, err := h.uc.GetTimeDiff(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, tDiffs)
+}
+func (h *ProductHandler) GetByDate(c *gin.Context) {
+	ctx := context.Background()
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+	}
+	var ph *entity.ProductHistory
+	var rd *entity.ReferenceDate
+	if err := c.ShouldBind(&rd); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	ph, err = h.uc.GetByDate(ctx, id, rd)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	}
+	c.JSON(http.StatusOK, ph)
+
 }

@@ -13,6 +13,9 @@ type ProductUseCase interface {
 	Delete(ctx context.Context, id uint64) error
 	List(ctx context.Context) ([]*entity.Product, error)
 	GetProductHistory(ctx context.Context, id uint64) (*entity.Product, []*entity.ProductHistory, error)
+	GetHighestPrice(ctx context.Context, id uint64) (*entity.ProductMaxValue, error)
+	GetTimeDiff(ctx context.Context, id uint64) ([]*entity.TimeDiff, error)
+	GetByDate(ctx context.Context, id uint64, rd *entity.ReferenceDate) (*entity.ProductHistory, error)
 }
 
 type productUseCase struct {
@@ -41,4 +44,13 @@ func (uc *productUseCase) List(ctx context.Context) ([]*entity.Product, error) {
 }
 func (uc *productUseCase) GetProductHistory(ctx context.Context, id uint64) (*entity.Product, []*entity.ProductHistory, error) {
 	return uc.repo.GetProductHistory(ctx, id)
+}
+func (uc *productUseCase) GetHighestPrice(ctx context.Context, id uint64) (*entity.ProductMaxValue, error) {
+	return uc.repo.GetHighestPrice(ctx, id)
+}
+func (uc *productUseCase) GetTimeDiff(ctx context.Context, id uint64) ([]*entity.TimeDiff, error) {
+	return uc.repo.GetTimeDiff(ctx, id)
+}
+func (uc *productUseCase) GetByDate(ctx context.Context, id uint64, rd *entity.ReferenceDate) (*entity.ProductHistory, error) {
+	return uc.repo.GetByDate(ctx, id, rd)
 }
