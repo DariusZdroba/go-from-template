@@ -159,13 +159,10 @@ func (r *productRepo) GetTimeDiff(ctx context.Context, id uint64) ([]*entity.Tim
 func (r *productRepo) GetByDate(ctx context.Context, id uint64, rd *entity.ReferenceDate) (*entity.ProductHistory, error) {
 	byDateQuery := `SELECT * FROM test.product_history WHERE product_id = ? AND ? BETWEEN valid_from AND valid_to ORDER BY valid_from DESC LIMIT 1`
 	ph := &entity.ProductHistory{}
-	rows, err := r.db.QueryContext(ctx, byDateQuery, id, rd.DateTime)
+	err := r.db.QueryRowContext(ctx, byDateQuery, id, rd.DateTime).
+		Scan(&ph.ID, &ph.ProductID, &ph.Name, &ph.Description, &ph.Price, &ph.ValidFrom, &ph.ValidTo)
 	if err != nil {
 		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		err = rows.Scan(&ph.ID, &ph.Name, &ph.Description, &ph.Price, &ph.ValidFrom, &ph.ValidTo)
 	}
 	return ph, nil
 }
