@@ -163,15 +163,18 @@ func (h *ProductHandler) GetByDate(c *gin.Context) {
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
 	}
 	var ph *entity.ProductHistory
 	var rd *entity.ReferenceDate
 	if err := c.ShouldBind(&rd); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	ph, err = h.uc.GetByDate(ctx, id, rd)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
 	}
 	c.JSON(http.StatusOK, ph)
 
